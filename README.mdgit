@@ -1,0 +1,1 @@
+"# PHP-example-Blog"  initgit add README.mdgit commit -m "first commit"git branch -M maingit remote add origin https://github.com/dondvdlaan/PHP-example-Blog.gitgit push -u origin main
