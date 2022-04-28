@@ -23,7 +23,7 @@
 					// Aus Sicherheitsgründen sollte man von einer solchen Lösung jedoch besser absehen
 					// static $PDO;
 					
-					// Neue Datenbankverbindung nur herstellen, wenn noch keine existiert
+					// Establish new DB connection, when none is in plce
 					if( !isset($PDO) ) {
 if(DEBUG_DB)		echo "<p class='debugDb'>📑 <b>Line " . __LINE__ . ":</b> Versuche mit der DB '<b>$dbname</b>' zu verbinden... <i>(" . basename(__FILE__) . ")</i></p>\r\n";					
 
