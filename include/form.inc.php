@@ -33,108 +33,98 @@ if(DEBUG_F)		echo "<p class='debugCleanString'>🌀 <b>Line " . __LINE__ . "</b>
 				
 
 #********************************************************************************************#
-
-				
 				/**
+				* 	Checks forwarded String on minium- and maxium length, as well optionally on
+				*	empty String.
+				*	Error is generated in case of empty String or unvalid length
 				*
-				*	Prüft einen übergebenen String auf Mindestlänge und Maximallänge sowie optional 
-				* 	zusätzlich auf Leerstring.
-				*	Generiert Fehlermeldung bei Leerstring oder ungültiger Länge
+				*	@param	String		$value							forwarded String
+				*	@param	Bool		$mandatory=true					toggle mandatory field	
+				*	@param	Integer		$minLength=INPUT_MIN_LENGTH		minimum length to be checked								
+				*	@param	Integer		$maxLength=INPUT_MAX_LENGTH		maximum length to be checked								
 				*
-				*	@param	String		$value									Der übergebene String
-				*	@param	Bool			$mandatory=true						Angabe zu Pflichteingabe	
-				*	@param	Integer		$minLength=INPUT_MIN_LENGTH		Die zu prüfende Mindestlänge								
-				*	@param	Integer		$maxLength=INPUT_MAX_LENGTH		Die zu prüfende Maximallänge								
-				*
-				*	@return	String|NULL												Fehlermeldung | ansonsten NULL
+				*	@return	String|NULL									error message | else NULL
 				*
 				*/
 				function checkInputString($value, $mandatory=true, $minLength=INPUT_MIN_LENGTH, $maxLength=INPUT_MAX_LENGTH) {
 if(DEBUG_F)		echo "<p class='debugCheckInputString'>🌀 <b>Line " . __LINE__ . "</b>: Aufruf " . __FUNCTION__ . "('$value' | [$minLength | $maxLength] | mandatory: $mandatory) <i>(" . basename(__FILE__) . ")</i></p>\n";	
 					
+					// Constants
+					$ERROR_MANDATORY_FIELD = 'This is a mandatory field!';
+					$ERROR_MINIMUM_LENGTH  = 'Shall hava a minimum length of %d characters!'
+					$ERROR_MAXIMUM_LENGTH  = 'Shall hava a maximum length of %d characters!'
+
 					/*
-						In der Programmierung müssen Werte aus Variablen immer wieder geprüft werden.
-						Beispielsweise im Rahmen einer Feldvalidierung für Formulare.
-						Hierzu wird der Wert einer Variablen auf seinen bool'schen Zustand (also true oder false)
-						interpretiert:
-						Als false werden interpretiert: Leerstring, Integer 0, Float 0.0, NULL, ein leeres Array oder 
-						der tatsächliche bool'sche Wert false.
-						Ausnahme: Ein String mit einer (!) Null ('0') wird als false interpretiert, '00' sind hingegen true
+						Variable is false when: empty String, Integer 0. Float 0.0, NULL, empty array or false
+						Exception: (!) Null ('0') are false, '00' is true.
 					*/
-					// Optional (wenn $mandatory===true): Prüfen auf Leerstring oder NULL
+					// Optional (when $mandatory===true): Check empty String or NULL
 					#********** MANDATORY CHECK **********#
 					if( $mandatory === true AND ($value === '' OR $value === NULL) ) {  // $value === NULL muss ergänzt werden, wenn cleanString() auf NULL-Rückgabe umgestellt wird.
-						// Fehlerfall
-						return 'Dies ist ein Pflichtfeld!';
+						// error case
+						return $ERROR_MANDATORY_FIELD;
 						
 					
 					#********** MINIMUM LENGTH CHECK **********#
 					} elseif( mb_strlen($value) < $minLength ) {
-						// Fehlerfall
-						return "Muss mindestens $minLength Zeichen lang sein!";
+						// error case
+						return sprintf($ERROR_MINIMUM_LENGTH, $minLength);
 						
 						
 					#********** MAXIMUM LENGTH CHECK **********#
 					} elseif( mb_strlen($value) > $maxLength ) {
-						// Fehlerfall
-						return "Darf maximal $maxLength Zeichen lang sein!";
+						// error case
+						return sprintf($ERROR_MAXIMUM_LENGTH, $maxLength);
 						
 					
 					#********** STRING IS VALID **********#
 					} else {
-						// Erfolgsfall
+						// success case
 						return NULL;
 					}				
 				}
 
-
 #********************************************************************************************#
-
-				
 				/**
+				*	Checks forwarded String on empty String and maximum length and if
+				*	Email is valid.
+				*	Error message is generated in each case.
 				*
-				*	Prüft einen übergebenen String auf Leerstring und Maximallänge
-				*	Prüft den übergebene String zusätzlich auf eine valide Email-Adresse
-				*	Generiert Fehlermeldung bei Leerstring oder ungültiger Maximallänge 
-				*	oder ungültiger Email-Adresse
+				*	@param	String	$value							forwarded String
+				*	@param	Bool	$mandatory=true					mandatory field	
+				*	@param	Integer	$maxLength=INPUT_MAX_LENGTH		maximum length to be checked
 				*
-				*	@param	String	$value									Der übergebene String
-				*	@param	Bool		$mandatory=true						Pflichteingabe	
-				*	@param	Integer	$maxLength=INPUT_MAX_LENGTH		Die zu prüfende Maximallänge
-				*
-				*	@return	String|NULL											Fehlermeldung | ansonsten NULL
+				*	@return	String|NULL								error message | else NULL
 				*
 				*/
 				function validateEmail($value, $mandatory=true, $minLength=INPUT_MIN_LENGTH, $maxLength=INPUT_MAX_LENGTH) {
 if(DEBUG_F)		echo "<p class='debugValidateEmail'>🌀 <b>Line " . __LINE__ . "</b>: Aufruf " . __FUNCTION__ . "('$value' | [$minLength | $maxLength] | mandatory: $mandatory) <i>(" . basename(__FILE__) . ")</i></p>\n";	
 					
+					// Constants
+					$ERROR_EMAIL_FIELD = 'This is not a valid Email';
 					
 					#********** VALIDATE MANDATORY AND MAXIMUM LENGTH **********#
-					// Prüfen auf Leerstring und Maximallänge
+					// Checks on empty String and length
 					if( $error = checkInputString($value, $mandatory, $minLength, $maxLength) ) {
-						// Fehlerfall
+						// error case
 						return $error;
 						
 					
 					#********** VALIDATE EMAIL ADDRESS **********#
 					} elseif( filter_var($value, FILTER_VALIDATE_EMAIL) === false ) {
-						// Fehlerfall
-						return 'Dies ist keine gültige Email-Adresse!';
+						// error case
+						return $ERROR_EMAIL_FIELD;
 					
 					
 					#********** STRING IS VALID EMAIL ADDRESS **********#
 					} else {
-						// Erfolgsfall
+						// success case
 						return NULL;
 					}
 				}
 
-
 #********************************************************************************************#
-
-				
 				/**
-				*
 				*	Validiert ein auf den Server geladenes Bild, generiert einen unique Dateinamen
 				*	sowie eine sichere Dateiendung und verschiebt das Bild in ein anzugebendes Zielverzeichnis.
 				*	Validiert werden der aus dem Dateiheader ausgelesene MIME-Type, die aus dem Dateiheader
