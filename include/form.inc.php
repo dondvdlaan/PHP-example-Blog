@@ -86,7 +86,7 @@ if(DEBUG_F)		echo "<p class='debugCheckInputString'>🌀 <b>Line " . __LINE__ . 
 
 #********************************************************************************************#
 				/**
-				*	Checks forwarded String on empty String and maximum length and if
+				*	Checks forwarded String on empty String and maximum length and whether
 				*	Email is valid.
 				*	Error message is generated in each case.
 				*
@@ -125,51 +125,53 @@ if(DEBUG_F)		echo "<p class='debugValidateEmail'>🌀 <b>Line " . __LINE__ . "</
 
 #********************************************************************************************#
 				/**
-				*	Validiert ein auf den Server geladenes Bild, generiert einen unique Dateinamen
-				*	sowie eine sichere Dateiendung und verschiebt das Bild in ein anzugebendes Zielverzeichnis.
-				*	Validiert werden der aus dem Dateiheader ausgelesene MIME-Type, die aus dem Dateiheader
-				*	ausgelesene Bildgröße in Pixeln sowie die ermittelte Dateigröße. 
-				*	Der Dateiheader wird außerdem auf Plausibilität geprüft.
+				*	Validates an Image stored on the server, generates a unique file name,
+				*	a secure file extension and moves the Image in a specified target directory.
+				*	The MIME-Type, the Image size in pixel as well as the determined file size,
+				*	all read from the file header,  are validated.
+				*	The file header is also checked for plausibility.
 				*
-				*	@param	String	$fileTemp														Der temporäre Pfad zum hochgeladenen Bild im Quarantäneverzeichnis
-				*	@param	Integer	$imageMaxWidth=IMAGE_MAX_WIDTH							Die maximal erlaubte Bildbreite in Pixeln
-				*	@param	Integer	$imageMaxHeight=IMAGE_MAX_HEIGHT							Die maximal erlaubte Bildhöhe in Pixeln
-				*	@param	Integer	$imageMaxSize=IMAGE_MAX_SIZE								Die maximal erlaubte Dateigröße in Bytes
-				*	@param	String	$imageUploadPath=IMAGE_UPLOAD_PATH						Das Zielverzeichnis
-				*	@param	Array		$imageAllowedMimeTypes=IMAGE_ALLOWED_MIME_TYPES		Whitelist der zulässigen MIME-Types mit den zugehörigen Dateiendungen
-				*	@param	Integer	$imageMinSize=IMAGE_MIN_SIZE								Die minimal erlaubte Dateigröße in Bytes
+				*	@param	String	$fileTemp											The temporary path to the uploaded image in the quarantine directory
+				*	@param	Integer	$imageMaxWidth=IMAGE_MAX_WIDTH						The maximum allowed image width in pixels
+				*	@param	Integer	$imageMaxHeight=IMAGE_MAX_HEIGHT					The maximum allowed image height in pixels
+				*	@param	Integer	$imageMaxSize=IMAGE_MAX_SIZE						The maximum allowed file size in Bytes
+				*	@param	String	$imageUploadPath=IMAGE_UPLOAD_PATH					Target directory
+				*	@param	Array	$imageAllowedMimeTypes=IMAGE_ALLOWED_MIME_TYPES		Whitelist of the permitted MIME types with the associated file extensions
+				*	@param	Integer	$imageMinSize=IMAGE_MIN_SIZE						The munimum allowed file size in Bytes
 				*
-				*	@return	Array		{'imagePath'	=>	String|NULL, 							Bei Erfolg der Speicherpfad zur Datei im Zielverzeichnis | bei Fehler NULL
-				*							 'imageError'	=>	String|NULL}							Bei Erfolg NULL | Bei Fehler Fehlermeldung
+				*	@return	Array		{'imagePath'	=>	String|NULL, 				If successful, the path to the file in the target directory | error case NULL
+				*							 'imageError'	=>	String|NULL}			success case NULL | error case error message
 				*
 				*/
 				function imageUpload( $fileTemp,
 											 $imageMaxWidth				= IMAGE_MAX_WIDTH,
-											 $imageMaxHeight				= IMAGE_MAX_HEIGHT,
-											 $imageMaxSize					= IMAGE_MAX_SIZE,
-											 $imageUploadPath				= IMAGE_UPLOAD_PATH,
+											 $imageMaxHeight			= IMAGE_MAX_HEIGHT,
+											 $imageMaxSize				= IMAGE_MAX_SIZE,
+											 $imageUploadPath			= IMAGE_UPLOAD_PATH,
 											 $imageAllowedMimeTypes		= IMAGE_ALLOWED_MIME_TYPES,
-											 $imageMinSize					= IMAGE_MIN_SIZE
+											 $imageMinSize				= IMAGE_MIN_SIZE
 											) {
-if(DEBUG_F)		echo "<p class='debugImageUpload'>🌀 <b>Line " . __LINE__ . "</b>: Aufruf " . __FUNCTION__ . "('$fileTemp') <i>(" . basename(__FILE__) . ")</i></p>\n";	
+if(DEBUG_F)		echo "<p class='debugImageUpload'>🌀 <b>Line " . __LINE__ . "</b>: Calling " . __FUNCTION__ . "('$fileTemp') <i>(" . basename(__FILE__) . ")</i></p>\n";	
 					
+					// Constants
+					$ERROR_MALICIOUS_SCRIPT = 'This is potential malicious script!';
 					
 					#***************************************************************************#
-					#********** GATHER INFORMATION FOR IMAGE FILE VIA THE FILE HEADER **********#
+					#********** GATHER INFORMATION FOR IMAGE FILE FROM FILE HEADER *************#
 					#***************************************************************************#
 					
-					/*
-						Die Funktion getimagesize() liest den Dateiheader einern Bilddatei aus und 
-						liefert bei gültigem MIME Type ('image/...') ein gemischtes Array zurück:
-						
-						[0] 				Bildbreite in PX 
-						[1] 				Bildhöhe in PX 
-						[3] 				Einen für das HTML <img>-Tag vorbereiteten String (width="480" height="532") 
-						['bits']			Anzahl der Bits pro Kanal 
-						['channels']	Anzahl der Farbkanäle (somit auch das Farbmodell: RGB=3, CMYK=4) 
-						['mime'] 		MIME Type
-						
-						Bei ungültigem MIME Type (also nicht 'image/...') liefert getimagesize() false zurück
+					/**
+					 *	Funktion getimagesize() reads the File header from an Image file and
+					 *	returns, in case of valid MIME Type ('image/...'), a mixed array.
+					 *
+					 *	[0] 				Image width in PX 
+					 *	[1] 				Image height in PX 
+					 *	[3] 				A prepared String for the HTML <img>-Tag(width="480" height="532")
+					 *	['bits']			Number of Bits per channel 
+					 *	['channels']		Color channels(also for colour model: RGB=3, CMYK=4 )
+					 *	['mime'] 			MIME Type
+					 *
+					 *	For invalid MIME Type (no 'image/...'), getimagesize() returns false
 					*/
 					$imageDataArray = getimagesize($fileTemp);
 /*					
@@ -180,17 +182,14 @@ if(DEBUG_V)		echo "</pre>";
 					
 					#********** CHECK FOR VALID MIME TYPE **********#
 					if( $imageDataArray === false ) {
-						// Fehlerfall (MIME TYPE is not valid)
-						/*
-							Bildwerte auf NULL setzen, damit die Variablen für die nachfolgenden
-							Validierungen exitieren und zu korrekten Fehlermeldungen führen
-						*/
+						// error case (MIME TYPE is not valid)
+
+						// Reset all Image variables
 						$imageWidth = $imageHeight = $imageMimeType = $fileSize = NULL;
-					
 
 					#********** FETCH FILE INFOS **********#
 					} elseif( is_array($imageDataArray) === true ) {
-						// Erfolgsfall (MIME TYPE is valid)
+						// success case (MIME TYPE is valid)
 						
 						$imageWidth 	= $imageDataArray[0];			// image width in px via getimagesize()
 						$imageHeight 	= $imageDataArray[1];			// image height in px via getimagesize()
@@ -202,34 +201,27 @@ if(DEBUG_V)		echo "<p class='debugImageUpload value'><b>Line " . __LINE__ . "</b
 if(DEBUG_V)		echo "<p class='debugImageUpload value'><b>Line " . __LINE__ . "</b>: \$imageMimeType: $imageMimeType <i>(" . basename(__FILE__) . ")</i></p>\n";
 if(DEBUG_V)		echo "<p class='debugImageUpload value'><b>Line " . __LINE__ . "</b>: \$fileSize: " . round($fileSize/1024, 2) . " kB <i>(" . basename(__FILE__) . ")</i></p>\n";
 					
-					#*************************************************#
-					
-					
 					#**************************************#
 					#********** IMAGE VALIDATION **********#
 					#**************************************#
 					
-					// Whitelist mit erlaubten MIME TYPES und Dateiendungen
-					// $imageAllowedMimeTypes = array('image/jpg' => '.jpg', 'image/jpeg' => '.jpg', 'image/png' => '.png', 'image/gif' => '.gif');
+					// Whitelist with allowed MIME TYPES and file extensions
+					   $imageAllowedMimeTypes = array('image/jpg' => '.jpg', 'image/jpeg' => '.jpg', 'image/png' => '.png', 'image/gif' => '.gif');
 					
 					/*
-						Da Schadcode häufig nur wenige Zeilen lang ist, ist eine zu kleine
-						Dateigröße per se verdächtig. Brauchbare Bilddateien beginnen bei
-						etwa 1kB Dateigröße (ca. 80-100Bytes für Icons).
-						Außerdem wird gleich geprüft, ob ein Hacker womöglich den MIME Type
-						im Dateiheader manipuliert hat. Bilder verfügen immer über eine Größenangabe
-						in Pixeln, die vom Hacker manchmal vergessen wird, ebenfalls in den manipulierten
-						Header einzufügen. Wenn die Bildgrößenangaben keinen Wert besitzen, muss von einem
-						manipulierten Dateiheader ausgegangen werden.
-						
-						Sollte getimagesize() aufgrund eines falschen MIME Types 'false' zurückgeliefert haben,
-						wurden im vorherigen Schritt alle Variablenwerte auf NULL gesetzt und führen hier 
-						automatisch zum Fehlerfall.
+						Since malicious code is often only a few lines long, a too small
+						File size is suspicious per se. Usable image files start at
+						about 1kB file size (about 80-100 bytes for icons).
+						In addition, it is immediately checked whether a hacker might have manipulated the MIME type
+						in the file header. Images always have a size indication
+						in pixels that are sometimes forgotten by the hacker.
+						If the image size specifications have no value, a manipulated 
+						file header is assumed.
 					*/
 					#********** CHECK IF FILE HEADER IS PLAUSIBLE **********#
 					if( $fileSize < $imageMinSize OR $imageWidth === NULL OR $imageHeight === NULL OR $imageMimeType === NULL ) {
-						// Fehlerfall 1: Potentiell verdächtiger Dateiheader
-						$errorMessage = 'Potentielles Schadskript entdeckt!';
+						// error case 1: Potential suspicious file header
+						$errorMessage = $ERROR_MALICIOUS_SCRIPT;
 					
 						
 					#********** CHECK FOR VALID MIME TYPE **********#
@@ -373,8 +365,6 @@ if(DEBUG_F)				echo "<p class='debugImageUpload ok'><b>Line " . __LINE__ . "</b>
 					#*************************************************#
 					
 				}
-
-
 #********************************************************************************************#
 ?>
 
