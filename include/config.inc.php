@@ -13,6 +13,9 @@
 				define('DB_PWD',					'');
 				
 				
+				#********** SESSION CONFIGURATION ************#
+				define('SESSION_NAME',					'blog');
+
 				#********** FORM CONFIGURATION ************#
 				define('INPUT_MIN_LENGTH', 			 0);
 				define('INPUT_MAX_LENGTH', 			 256);
@@ -35,7 +38,7 @@
 				define('DEBUG', 						true);	// Debugging main documents
 				define('DEBUG_V', 						false);	// Debugging for values
 				define('DEBUG_F', 						false);	// Debugging for functions
-				define('DEBUG_I', 						false);	// Debugging for included files
+				define('DEBUG_I', 						true);	// Debugging for included files
 				define('DEBUG_DB', 						false);	// Debugging for database operations
 
 

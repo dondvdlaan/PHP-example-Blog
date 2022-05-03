@@ -51,8 +51,8 @@ if(DEBUG_F)		echo "<p class='debugCheckInputString'>🌀 <b>Line " . __LINE__ . 
 					
 					// Constants
 					$ERROR_MANDATORY_FIELD = 'This is a mandatory field!';
-					$ERROR_MINIMUM_LENGTH  = 'Shall hava a minimum length of %d characters!'
-					$ERROR_MAXIMUM_LENGTH  = 'Shall hava a maximum length of %d characters!'
+					$ERROR_MINIMUM_LENGTH  = 'Shall hava a minimum length of %d characters!';
+					$ERROR_MAXIMUM_LENGTH  = 'Shall hava a maximum length of %d characters!';
 
 					/*
 						Variable is false when: empty String, Integer 0. Float 0.0, NULL, empty array or false
@@ -155,6 +155,10 @@ if(DEBUG_F)		echo "<p class='debugImageUpload'>🌀 <b>Line " . __LINE__ . "</b>
 					
 					// Constants
 					$ERROR_MALICIOUS_SCRIPT = 'This is potential malicious script!';
+					$ERROR_MIME_TYPE = 'This is not a valid Image type!';
+					$ERROR_IMAGE_WIDTH = 'Image width maximum is %s px';
+					$ERROR_IMAGE_HEIGHT = 'Image heigth maximum is %s px';
+					$ERROR_IMAGE_SIZE = 'Image size may not surpass %d kB';
 					
 					#***************************************************************************#
 					#********** GATHER INFORMATION FOR IMAGE FILE FROM FILE HEADER *************#
@@ -222,36 +226,28 @@ if(DEBUG_V)		echo "<p class='debugImageUpload value'><b>Line " . __LINE__ . "</b
 					if( $fileSize < $imageMinSize OR $imageWidth === NULL OR $imageHeight === NULL OR $imageMimeType === NULL ) {
 						// error case 1: Potential suspicious file header
 						$errorMessage = $ERROR_MALICIOUS_SCRIPT;
-					
 						
 					#********** CHECK FOR VALID MIME TYPE **********#
-					/*
-						Der optionale 3. Parameter der in_array()-Funktion erzwingt einen strikten Wertevergleich, 
-						damit '0' und '' nicht als gleich interpretiert werden.
-						Er sollte aus Sicherheitsgründen immer gesetzt werden.
-						in_array() liefert 'true' zurück, wenn die Needle im Array gefunden wurde, ansonsten 'false'.
-					*/
 					} elseif( in_array($imageMimeType, array_keys($imageAllowedMimeTypes), true) === false ) {
-						// Fehlerfall 2: Unerlaubter MIME TYPE
-						$errorMessage = 'Dies ist kein erlaubter Bildtyp!';
+						// error case 2: MIME TYPE not allowed
+						$errorMessage = $ERROR_MIME_TYPE;
 					
 					
 					#********** VALIDATE IMAGE WIDTH **********#
 					} elseif( $imageWidth > $imageMaxWidth ) {
-						// Fehlerfall 3: Bildbreite zu groß
-						$errorMessage = "Die Bildbreite darf maximal $imageMaxWidth Pixel betragen!";
+						// error case 3: Image width too big
+						$errorMessage = sprintf($ERROR_IMAGE_WIDTH, $imageMaxWidth);
 					
 					
 					#********** VALIDATE IMAGE HEIGHT **********#
 					} elseif( $imageHeight > $imageMaxHeight ) {
-						// Fehlerfall 4: Bildhöhe zu groß
-						$errorMessage = "Die Bildhöhe darf maximal $imageMaxHeight Pixel betragen!";
-						
+						// error case 4: Image height too big
+						$errorMessage = sprintf($ERROR_IMAGE_HEIGHT, $imageMaxHeight);
 						
 					#********** VALIDATE FILE SIZE **********#	
 					} elseif( $fileSize > $imageMaxSize ) {
-						// Fehlerfall 5: Dateigröße zu groß
-						$errorMessage = 'Die Dateigröße darf maximal ' . $imageMaxSize/1024 . 'kB betragen!';
+						// error case 5: Image size too big
+						$errorMessage = sprintf($ERROR_IMAGE_SIZE, $imageMaxSize/1024);
 						
 					
 					#********** ALL CHECKS ARE PASSED **********#
