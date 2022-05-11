@@ -214,11 +214,14 @@ if(DEBUG)							echo "<p class='debug ok'><b>Line " . __LINE__ . "</b>: Userdate
 									// Erfolgsmeldung an User
 								$dbSuccess = "Ihre Kategorie $category war erfolgreich gespeichert.";
 
-								// DB-Verbindung beenden
-								unset($PDO);
+								
 
 								} // END #********** SAVE CATEGORY **********#	
 							} // END #********** CHECK CATEGORY ALREADY EXISTS **********#
+
+							// DB-Verbindung beenden
+							unset($PDO);
+						
 						} // END #********** VALIDATE FORM CATEGORY **********#
 					} // END #********** PROCESS FORM CATEGORY **********#
 

@@ -291,6 +291,8 @@ if(DEBUG)					echo "<p class='debug ok'><b>Line " . __LINE__ . "</b>: Session er
 																	
 					} // FINAL FORM VALIDATION END
 					
+					// DB-Verbindung beenden
+					unset($PDO);
 				} // PROCESS FORM LOGIN END
 				#********************************************************************************************
 
@@ -390,7 +392,7 @@ if(DEBUG_V)			echo "<p class='debug value'><b>Line " . __LINE__ . "</b>: \$rowCo
 				<p class="right">Kategorie: <?php echo $blog['catLabel'] ?></p><br>
 				<h3>Title: <?php echo $blog['blogHeadline'] ?></h3><br>
 				<?php if(isset($blog['blogImagePath'])): ?>
-				<p><img class="<?= $blog['blogImageAlignment'] ?>"  src="<?php echo $blog['blogImagePath'] ?>" width="250" height="auto"></p><br>
+				<p><img class="<?= $blog['blogImageAlignment'] ?>"  src="<?php echo $blog['blogImagePath'] ?>" style="padding: 25px;" width="250" height="auto"></p><br>
 				<?php endif ?>
 				<?php echo nl2br($blog['blogContent']) ?>
 				<br>

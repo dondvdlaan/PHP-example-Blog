@@ -9,8 +9,8 @@
 				define('DB_SYSTEM',					'mysql');
 				define('DB_HOST',					'localhost');
 				define('DB_NAME',					'blog');
-				define('DB_USER',					'root');
-				define('DB_PWD',					'');
+				define('DB_USER',					'pato');
+				define('DB_PWD',					'duck');
 				
 				
 				#********** SESSION CONFIGURATION ************#
@@ -36,10 +36,10 @@
 				
 				#********** DEBUGGING *********************#				
 				define('DEBUG', 						true);	// Debugging main documents
-				define('DEBUG_V', 						false);	// Debugging for values
-				define('DEBUG_F', 						false);	// Debugging for functions
+				define('DEBUG_V', 						true);	// Debugging for values
+				define('DEBUG_F', 						true);	// Debugging for functions
 				define('DEBUG_I', 						true);	// Debugging for included files
-				define('DEBUG_DB', 						false);	// Debugging for database operations
+				define('DEBUG_DB', 						true);	// Debugging for database operations
 
 
 #***************************************************************************************#
