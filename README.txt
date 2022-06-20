@@ -11,4 +11,5 @@ Summary:
 2. HTML CSS Front-End
 3. MySQL DB for user, account and category tables
 
+Load blog.sql for DB.
 Username / Password to enter dashboard: a@b.c / admin
