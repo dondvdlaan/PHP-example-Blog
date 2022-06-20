@@ -9,8 +9,8 @@
 				define('DB_SYSTEM',					'mysql');
 				define('DB_HOST',					'localhost');
 				define('DB_NAME',					'blog');
-				define('DB_USER',					'pato');
-				define('DB_PWD',					'duck');
+				define('DB_USER',					'kwak');
+				define('DB_PWD',					'duckcountry');
 				
 				
 				#********** SESSION CONFIGURATION ************#

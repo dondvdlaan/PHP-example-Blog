@@ -66,13 +66,13 @@ if(DEBUG_F)		echo "<p class='debugCheckInputString'>🌀 <b>Line " . __LINE__ . 
 						
 					
 					#********** MINIMUM LENGTH CHECK **********#
-					} elseif( mb_strlen($value) < $minLength ) {
+					} elseif( strlen($value) < $minLength ) {
 						// error case
 						return sprintf($ERROR_MINIMUM_LENGTH, $minLength);
 						
 						
 					#********** MAXIMUM LENGTH CHECK **********#
-					} elseif( mb_strlen($value) > $maxLength ) {
+					} elseif( strlen($value) > $maxLength ) {
 						// error case
 						return sprintf($ERROR_MAXIMUM_LENGTH, $maxLength);
 						
